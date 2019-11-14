@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="nqaKeX" name="JUCETesto" projectType="audioplug" jucerVersion="5.4.5"
+              compilerFlagSchemes="DUSE_KISS_FFT">
+  <MAINGROUP id="pBm1L7" name="JUCETesto">
+    <GROUP id="{E450D265-0F29-4F1C-2D87-FC04EA33BAC2}" name="Source">
+      <GROUP id="{276EADA5-4E38-1F32-61FE-B51C9F183C26}" name="gist">
+        <GROUP id="{72073FB4-279A-EDCF-05C0-64978ABC8117}" name="libs">
+          <GROUP id="{2BE3BD3E-D854-B680-D9E8-A425D6834F53}" name="kiss_fft130">
+            <FILE id="WWcsML" name="_kiss_fft_guts.h" compile="0" resource="0"
+                  file="Source/gist/libs/kiss_fft130/_kiss_fft_guts.h"/>
+            <FILE id="Ir5VP2" name="COPYING" compile="0" resource="1" file="Source/gist/libs/kiss_fft130/COPYING"/>
+            <FILE id="behcdX" name="kiss_fft.c" compile="1" resource="0" file="Source/gist/libs/kiss_fft130/kiss_fft.c"/>
+            <FILE id="VJvE8i" name="kiss_fft.h" compile="0" resource="0" file="Source/gist/libs/kiss_fft130/kiss_fft.h"/>
+            <FILE id="tEVU5v" name="kissfft.hh" compile="0" resource="0" file="Source/gist/libs/kiss_fft130/kissfft.hh"/>
+            <FILE id="mAam2j" name="README" compile="0" resource="1" file="Source/gist/libs/kiss_fft130/README"/>
+          </GROUP>
+        </GROUP>
+        <GROUP id="{4E9A12E7-D0E6-F30F-B71C-172018211D0D}" name="src">
+          <GROUP id="{5137AAEE-7DB5-94E6-0191-93E4840D4F5C}" name="core">
+            <FILE id="JCbOff" name="CoreFrequencyDomainFeatures.cpp" compile="1"
+                  resource="0" file="Source/gist/src/core/CoreFrequencyDomainFeatures.cpp"/>
+            <FILE id="hEpQtk" name="CoreFrequencyDomainFeatures.h" compile="0"
+                  resource="0" file="Source/gist/src/core/CoreFrequencyDomainFeatures.h"/>
+            <FILE id="XbAmeG" name="CoreTimeDomainFeatures.cpp" compile="1" resource="0"
+                  file="Source/gist/src/core/CoreTimeDomainFeatures.cpp"/>
+            <FILE id="qqwfJj" name="CoreTimeDomainFeatures.h" compile="0" resource="0"
+                  file="Source/gist/src/core/CoreTimeDomainFeatures.h"/>
+          </GROUP>
+          <GROUP id="{7A3F70C8-D7DC-6603-5893-099F2B26BD20}" name="fft">
+            <FILE id="S9nZXW" name="WindowFunctions.cpp" compile="1" resource="0"
+                  file="Source/gist/src/fft/WindowFunctions.cpp"/>
+            <FILE id="KiPa0Y" name="WindowFunctions.h" compile="0" resource="0"
+                  file="Source/gist/src/fft/WindowFunctions.h"/>
+          </GROUP>
+          <GROUP id="{E1D0C037-627A-2675-929A-5D76A3F22EDB}" name="mfcc">
+            <FILE id="IsJY7R" name="MFCC.cpp" compile="0" resource="0" file="Source/gist/src/mfcc/MFCC.cpp"/>
+            <FILE id="uyJQmg" name="MFCC.h" compile="0" resource="0" file="Source/gist/src/mfcc/MFCC.h"/>
+          </GROUP>
+          <GROUP id="{BE3ADC67-DAEB-4466-F875-0FC717F1C942}" name="onset-detection-functions">
+            <FILE id="qxlUhi" name="OnsetDetectionFunction.cpp" compile="1" resource="0"
+                  file="Source/gist/src/onset-detection-functions/OnsetDetectionFunction.cpp"/>
+            <FILE id="TwhU4y" name="OnsetDetectionFunction.h" compile="0" resource="0"
+                  file="Source/gist/src/onset-detection-functions/OnsetDetectionFunction.h"/>
+          </GROUP>
+          <GROUP id="{4DBC2D71-6BE0-F992-702E-926423D50283}" name="pitch">
+            <FILE id="oJ0oyg" name="Yin.cpp" compile="1" resource="0" file="Source/gist/src/pitch/Yin.cpp"/>
+            <FILE id="TuP7ku" name="Yin.h" compile="0" resource="0" file="Source/gist/src/pitch/Yin.h"/>
+          </GROUP>
+          <FILE id="xeaWCy" name="Gist.cpp" compile="1" resource="0" file="Source/gist/src/Gist.cpp"
+                compilerFlagScheme="DUSE_KISS_FFT"/>
+          <FILE id="lNDCZU" name="Gist.h" compile="0" resource="0" file="Source/gist/src/Gist.h"/>
+        </GROUP>
+      </GROUP>
+      <FILE id="VoNazW" name="SpectrogramComponent.cpp" compile="1" resource="0"
+            file="Source/SpectrogramComponent.cpp"/>
+      <FILE id="UWYiN7" name="SpectrogramComponent.h" compile="0" resource="0"
+            file="Source/SpectrogramComponent.h"/>
+      <FILE id="PdjxzN" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="AKbheS" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="JhGpz2" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="yOdlK0" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <VS2019 targetFolder="Builds/VisualStudio2019">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../../../JUCE/modules"/>
+      </MODULEPATHS>
+    </VS2019>
+    <CLION targetFolder="Builds/CLion" clionCodeBlocksEnabled="1">
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../../../JUCE/modules"/>
+      </MODULEPATHS>
+    </CLION>
+    <CODEBLOCKS_WINDOWS targetFolder="Builds/CodeBlocksWindows">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_opengl"/>
+        <MODULEPATH id="juce_gui_extra"/>
+        <MODULEPATH id="juce_gui_basics"/>
+        <MODULEPATH id="juce_graphics"/>
+        <MODULEPATH id="juce_events"/>
+        <MODULEPATH id="juce_data_structures"/>
+        <MODULEPATH id="juce_cryptography"/>
+        <MODULEPATH id="juce_core"/>
+        <MODULEPATH id="juce_audio_utils"/>
+        <MODULEPATH id="juce_audio_processors"/>
+        <MODULEPATH id="juce_audio_plugin_client"/>
+        <MODULEPATH id="juce_audio_formats"/>
+        <MODULEPATH id="juce_audio_devices"/>
+        <MODULEPATH id="juce_audio_basics"/>
+        <MODULEPATH id="juce_dsp" path="../../../../JUCE/modules"/>
+      </MODULEPATHS>
+    </CODEBLOCKS_WINDOWS>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <LIVE_SETTINGS>
+    <WINDOWS buildEnabled="1"/>
+  </LIVE_SETTINGS>
+  <JUCEOPTIONS JUCE_VST3_CAN_REPLACE_VST2="0" JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
+</JUCERPROJECT>
