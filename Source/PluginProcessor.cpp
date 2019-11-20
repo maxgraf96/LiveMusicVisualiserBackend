@@ -12,18 +12,16 @@ JucetestoAudioProcessor::JucetestoAudioProcessor()
                      #endif
                        ),
 spectrogramImage(Image::RGB, 512, 256, true),
-gist(fftSize, gistSampleRate)
+gist(fftSize, gistSampleRate = 44100)
 #endif
 {
-	/*addParameter(mGainParameter = new AudioParameterFloat(
-		"gain",
-		"Gain",
-		0.0f,
-		1.0f,
-		0.5f));
+	addParameter(indexParam = new AudioParameterInt(
+		"index",
+		"Index",
+		0,
+		127,
+		63));
 	
-	mGainSmoothed = mGainParameter->get();*/
-
 	socket.bindToPort(1234);
 	socket.write("127.0.0.1", 1235, "init", 4);
 }
@@ -54,18 +52,38 @@ void JucetestoAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
 	for (int sample = 0; sample < buffer.getNumSamples(); sample++)
 	{
-		//mGainSmoothed = mGainSmoothed - 0.004 * (mGainSmoothed - mGainParameter->get());
-		//channelLeft[sample] *= mGainSmoothed;
-		//channelRight[sample] *= mGainSmoothed;
-
 		pushNextSampleIntoFifo(channelLeft[sample]);
 	}
 	// Send FFT data if buffer is full
-	if (gistFFTReady)
+	if (dataReady)
 	{
 		calculateAndSendData();
-		gistFFTReady = false;
+		dataReady = false;
 	}
+
+	//// ---------------- MIDI ----------------
+	//MidiBuffer processedMidi;
+	//int time;
+	//MidiMessage m;
+	//for (MidiBuffer::Iterator i(midiMessages); i.getNextEvent(m, time);)
+	//{
+	//	if (m.isNoteOn())
+	//	{
+	//		uint8 newVel = (uint8) indexValue;
+	//		m = MidiMessage::noteOn(m.getChannel(), m.getNoteNumber(), newVel);
+	//	}
+	//	else if (m.isNoteOff())
+	//	{
+	//	}
+	//	else if (m.isAftertouch())
+	//	{
+	//	}
+	//	else if (m.isPitchWheel())
+	//	{
+	//	}
+	//	processedMidi.addEvent(m, time);
+	//}
+	//midiMessages.swapWith(processedMidi);
 }
 
 JucetestoAudioProcessor::~JucetestoAudioProcessor()
@@ -82,14 +100,10 @@ void JucetestoAudioProcessor::pushNextSampleIntoFifo(const float sample)
 		gistIndex = 0;
 		gist.processAudioFrame(gistAudioFrame, fftSize);
 		gistMagnitudeVector = gist.getMagnitudeSpectrum();
-		gistFFTReady = true;
-		//skipper = 0;
+		pitch = gist.pitch();
+		spectralCentroid = gist.spectralCentroid();
+		dataReady = true;
 	}
-	/*else if (gistIndex == fftSize && skipper != skipperThreshold)
-	{
-		gistIndex = 0;
-		skipper++;
-	}*/
 
 	gistAudioFrame[gistIndex++] = sample;
 }
@@ -98,8 +112,10 @@ void JucetestoAudioProcessor::calculateAndSendData()
 {
 	// Calculate 7 average energy levels for that iteration (7 frequency components => 7 cubes in Unity)
 	int idx = 0;
+
+	// FFT data
 	const int step = fftSize / 2 / 7;
-	for (auto y = 0; y < (fftSize / 2 - 1); y += step)
+	for (auto y = 0; y < (fftSize / 2 - step); y += step)
 	{
 		float level = 0.0f;
 		for (int i = y; i < y + step; i++)
@@ -110,16 +126,18 @@ void JucetestoAudioProcessor::calculateAndSendData()
 		idx++;
 	}
 
+	// Spectral centroid
+	udpData[idx++] = int(spectralCentroid);
+	udpData[idx++] = indexParam->get();
+
 	// Send data to Unity via UDP
-	socket.write("127.0.0.1", 1236, &udpData, 7);
+	socket.write("127.0.0.1", 1236, &udpData, idx);
 }
 
 Image *JucetestoAudioProcessor::getSpectrogram()
 {
 	return &spectrogramImage;
 }
-
-
 
 const String JucetestoAudioProcessor::getName() const
 {

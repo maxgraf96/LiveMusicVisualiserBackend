@@ -12,8 +12,6 @@ public:
 	
 	void paint(Graphics& g) override;
 
-	//void timerCallback() override;
-
 private:
 	Image spectrogramImage;
 	JucetestoAudioProcessor& processor;

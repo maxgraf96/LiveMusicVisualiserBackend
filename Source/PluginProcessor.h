@@ -42,13 +42,15 @@ public:
 
 	enum
 	{
-		fftOrder = 10,
+		fftOrder = 11,
 		fftSize = 1 << fftOrder
 	};
 
+	// MIDI
+	int indexValue;
+
 private:
-	//AudioParameterFloat* mGainParameter;
-	//float mGainSmoothed;
+	AudioParameterInt* indexParam;
 
 	int rData[fftSize / 2];
 	int gData[fftSize / 2];
@@ -64,13 +66,14 @@ private:
 	void calculateAndSendData();
 
 	// Gist
-	int gistSampleRate = 44100;
-	int gistIndex = 0;
-	bool gistFFTReady = false;
-	std::vector<float> gistMagnitudeVector;
-
 	Gist<float> gist;
 	float gistAudioFrame[fftSize];
+	
+	int gistSampleRate = 44100;
+	int gistIndex = 0;
+	bool dataReady = false;
+	std::vector<float> gistMagnitudeVector;
+	float pitch, spectralCentroid;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(JucetestoAudioProcessor);
 };

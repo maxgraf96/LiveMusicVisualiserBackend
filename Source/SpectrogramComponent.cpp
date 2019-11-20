@@ -5,7 +5,6 @@ SpectrogramComponent::SpectrogramComponent(JucetestoAudioProcessor& p) :
 	processor(p)
 {
 	setOpaque(true);
-	//startTimerHz(60);
 	setSize(700, 500);
 }
 
@@ -16,9 +15,3 @@ void SpectrogramComponent::paint(Graphics& g)
 	g.setOpacity(1.0f);
 	//g.drawImage(spectrogramImage, getLocalBounds().toFloat());
 }
-
-//void SpectrogramComponent::timerCallback()
-//{
-//	//spectrogramImage = *processor.getSpectrogram();
-//	//repaint();
-//}
