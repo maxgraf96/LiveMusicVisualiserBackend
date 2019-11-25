@@ -15,9 +15,21 @@ spectrogramImage(Image::RGB, 512, 256, true),
 gist(fftSize, gistSampleRate = 44100)
 #endif
 {
+	addParameter(thumbParam = new AudioParameterInt(
+		"thumb",
+		"Thumb",
+		0,
+		127,
+		63));
 	addParameter(indexParam = new AudioParameterInt(
 		"index",
 		"Index",
+		0,
+		127,
+		63));
+	addParameter(ringParam = new AudioParameterInt(
+		"ring",
+		"Ring",
 		0,
 		127,
 		63));
@@ -129,6 +141,8 @@ void JucetestoAudioProcessor::calculateAndSendData()
 	// Spectral centroid
 	udpData[idx++] = int(spectralCentroid);
 	udpData[idx++] = indexParam->get();
+	udpData[idx++] = thumbParam->get();
+	udpData[idx++] = ringParam->get();
 
 	// Send data to Unity via UDP
 	socket.write("127.0.0.1", 1236, &udpData, idx);

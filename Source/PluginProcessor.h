@@ -51,6 +51,8 @@ public:
 
 private:
 	AudioParameterInt* indexParam;
+	AudioParameterInt* thumbParam;
+	AudioParameterInt* ringParam;
 
 	int rData[fftSize / 2];
 	int gData[fftSize / 2];
