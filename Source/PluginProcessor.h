@@ -47,19 +47,28 @@ public:
 	};
 
 	// MIDI
+	double startTime;
 	int indexValue;
 
 private:
+	// Flex glove parameters
 	AudioParameterInt* indexParam;
 	AudioParameterInt* thumbParam;
 	AudioParameterInt* ringParam;
+
+	// Drum glove parameters
+	AudioParameterInt* thumbParamDrums;
+	AudioParameterInt* indexParamDrums;
+	AudioParameterInt* middleParamDrums;
+	AudioParameterInt* ringParamDrums;
+	AudioParameterInt* pinkyParamDrums;
 
 	int rData[fftSize / 2];
 	int gData[fftSize / 2];
 	int bData[fftSize / 2];
 	
 	DatagramSocket socket;
-	unsigned char udpData[7];
+	unsigned char udpData[16];
 	
 	// Spectrogram related stuff
 	Image spectrogramImage;
@@ -76,6 +85,15 @@ private:
 	bool dataReady = false;
 	std::vector<float> gistMagnitudeVector;
 	float pitch, spectralCentroid;
+
+	// MIDI
+	MidiBuffer processedMidi;
+	bool thumbOn = false;
+	const int channel = 1;
+	int thumbNoteNumber = 69; // 440Hz
+
+	// Helper methods
+	int map(int x, int from_min, int from_max, int to_min, int to_max);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(JucetestoAudioProcessor);
 };

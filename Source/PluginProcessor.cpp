@@ -12,9 +12,11 @@ JucetestoAudioProcessor::JucetestoAudioProcessor()
                      #endif
                        ),
 spectrogramImage(Image::RGB, 512, 256, true),
-gist(fftSize, gistSampleRate = 44100)
+gist(fftSize, gistSampleRate = 44100),
+startTime(Time::getMillisecondCounterHiRes() * 0.001)
 #endif
 {
+	// Flex glove parameters
 	addParameter(thumbParam = new AudioParameterInt(
 		"thumb",
 		"Thumb",
@@ -33,6 +35,38 @@ gist(fftSize, gistSampleRate = 44100)
 		0,
 		127,
 		63));
+
+	// Drum glove parameters
+	addParameter(thumbParamDrums = new AudioParameterInt(
+		"thumbDrums",
+		"ThumbDrums",
+		0,
+		127,
+		0));
+	addParameter(indexParamDrums = new AudioParameterInt(
+		"indexDrums",
+		"IndexDrums",
+		0,
+		127,
+		0));
+	addParameter(middleParamDrums = new AudioParameterInt(
+		"middleDrums",
+		"middleDrums",
+		0,
+		127,
+		0));
+	addParameter(ringParamDrums = new AudioParameterInt(
+		"ringDrums",
+		"RingDrums",
+		0,
+		127,
+		0));
+	addParameter(pinkyParamDrums = new AudioParameterInt(
+		"pinkyDrums",
+		"PinkyDrums",
+		0,
+		127,
+		0));
 	
 	socket.bindToPort(1234);
 	socket.write("127.0.0.1", 1235, "init", 4);
@@ -64,7 +98,7 @@ void JucetestoAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 
 	for (int sample = 0; sample < buffer.getNumSamples(); sample++)
 	{
-		pushNextSampleIntoFifo(channelLeft[sample]);
+		pushNextSampleIntoFifo((channelLeft[sample] + channelRight[sample]) / 2);
 	}
 	// Send FFT data if buffer is full
 	if (dataReady)
@@ -73,29 +107,22 @@ void JucetestoAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 		dataReady = false;
 	}
 
-	//// ---------------- MIDI ----------------
-	//MidiBuffer processedMidi;
-	//int time;
-	//MidiMessage m;
-	//for (MidiBuffer::Iterator i(midiMessages); i.getNextEvent(m, time);)
-	//{
-	//	if (m.isNoteOn())
-	//	{
-	//		uint8 newVel = (uint8) indexValue;
-	//		m = MidiMessage::noteOn(m.getChannel(), m.getNoteNumber(), newVel);
-	//	}
-	//	else if (m.isNoteOff())
-	//	{
-	//	}
-	//	else if (m.isAftertouch())
-	//	{
-	//	}
-	//	else if (m.isPitchWheel())
-	//	{
-	//	}
-	//	processedMidi.addEvent(m, time);
-	//}
-	//midiMessages.swapWith(processedMidi);
+	// ---------------- MIDI ----------------
+	auto currentTime = Time::getMillisecondCounterHiRes() * 0.001 - startTime;
+	const uint8 newVel = static_cast<uint8>(ringParam->get());
+	if (thumbParamDrums->get() > 15 && !thumbOn)
+	{
+		thumbOn = true;
+		MidiMessage m = MidiMessage::noteOn(channel, thumbNoteNumber, newVel);
+		processedMidi.addEvent(m, currentTime);
+	}
+	/*const int pwValue = map(ringParam->get(), 0, 127, 0, 16383);
+	MidiMessage m = MidiMessage::pitchWheel(channel, pwValue);
+	currentTime += 0.001;
+	processedMidi.addEvent(m, currentTime); */
+
+	// Send
+	midiMessages.swapWith(processedMidi);
 }
 
 JucetestoAudioProcessor::~JucetestoAudioProcessor()
@@ -140,12 +167,34 @@ void JucetestoAudioProcessor::calculateAndSendData()
 
 	// Spectral centroid
 	udpData[idx++] = int(spectralCentroid);
+	// Flex glove params
 	udpData[idx++] = indexParam->get();
 	udpData[idx++] = thumbParam->get();
 	udpData[idx++] = ringParam->get();
+	// Drum glove params
+	udpData[idx++] = thumbParamDrums->get();
+	udpData[idx++] = indexParamDrums->get();
+	udpData[idx++] = middleParamDrums->get();
+	udpData[idx++] = ringParamDrums->get();
+	udpData[idx++] = pinkyParamDrums->get();
 
 	// Send data to Unity via UDP
 	socket.write("127.0.0.1", 1236, &udpData, idx);
+
+	// Create midi messages
+	auto currentTime = Time::getMillisecondCounterHiRes() * 0.001 - startTime;
+	// Disable thumb note after spec component 0 drops below threshold
+	if(static_cast<int>(udpData[0]) < 1)
+	{
+		thumbOn = false;
+		MidiMessage m = MidiMessage::noteOff(channel, thumbNoteNumber);
+		processedMidi.addEvent(m, currentTime);
+	}
+}
+
+int JucetestoAudioProcessor::map(int x, int from_min, int from_max, int to_min, int to_max)
+{
+	return (x - from_min) * (to_max - to_min) / (from_max - from_min) + to_min;
 }
 
 Image *JucetestoAudioProcessor::getSpectrogram()
