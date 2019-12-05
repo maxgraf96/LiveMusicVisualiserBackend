@@ -88,12 +88,12 @@ private:
 
 	// MIDI
 	MidiBuffer processedMidi;
-	bool thumbOn = false;
+	bool pinkyOn = false;
 	const int channel = 1;
-	int thumbNoteNumber = 69; // 440Hz
+	int pinkyNoteNumber = 69; // 440Hz
 
 	// Helper methods
-	int map(int x, int from_min, int from_max, int to_min, int to_max);
+	static int map(int x, int from_min, int from_max, int to_min, int to_max);
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(JucetestoAudioProcessor);
 };

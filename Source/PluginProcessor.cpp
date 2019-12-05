@@ -108,19 +108,23 @@ void JucetestoAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 	}
 
 	// ---------------- MIDI ----------------
-	auto currentTime = Time::getMillisecondCounterHiRes() * 0.001 - startTime;
+	const auto currentTime = Time::getMillisecondCounterHiRes() * 0.001 - startTime;
 	const uint8 newVel = static_cast<uint8>(ringParam->get());
-	if (thumbParamDrums->get() > 15 && !thumbOn)
+	// Pinky finger triggers note on
+	if (pinkyParamDrums->get() > 15 && !pinkyOn)
 	{
-		thumbOn = true;
-		MidiMessage m = MidiMessage::noteOn(channel, thumbNoteNumber, newVel);
+		pinkyOn = true;
+		MidiMessage m = MidiMessage::noteOn(channel, pinkyNoteNumber, newVel);
 		processedMidi.addEvent(m, currentTime);
 	}
-	/*const int pwValue = map(ringParam->get(), 0, 127, 0, 16383);
-	MidiMessage m = MidiMessage::pitchWheel(channel, pwValue);
-	currentTime += 0.001;
-	processedMidi.addEvent(m, currentTime); */
-
+	// Middle finger triggers note off
+	if (middleParamDrums->get() > 15 && pinkyOn)
+	{
+		pinkyOn = false;
+		MidiMessage m = MidiMessage::noteOff(channel, pinkyNoteNumber);
+		processedMidi.addEvent(m, currentTime);
+	}
+	
 	// Send
 	midiMessages.swapWith(processedMidi);
 }
@@ -180,16 +184,6 @@ void JucetestoAudioProcessor::calculateAndSendData()
 
 	// Send data to Unity via UDP
 	socket.write("127.0.0.1", 1236, &udpData, idx);
-
-	// Create midi messages
-	auto currentTime = Time::getMillisecondCounterHiRes() * 0.001 - startTime;
-	// Disable thumb note after spec component 0 drops below threshold
-	if(static_cast<int>(udpData[0]) < 1)
-	{
-		thumbOn = false;
-		MidiMessage m = MidiMessage::noteOff(channel, thumbNoteNumber);
-		processedMidi.addEvent(m, currentTime);
-	}
 }
 
 int JucetestoAudioProcessor::map(int x, int from_min, int from_max, int to_min, int to_max)
