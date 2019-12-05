@@ -1,6 +1,10 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+/**
+ * This class is responsible for processing all the incoming audio (and MIDI data) for the plugin
+ * and in this case, passing it on to Unity via UDP.
+ */
 JucetestoAudioProcessor::JucetestoAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
@@ -11,12 +15,18 @@ JucetestoAudioProcessor::JucetestoAudioProcessor()
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
                        ),
+// A placeholder for a visual representation of the spectrogram (not currently in use)
 spectrogramImage(Image::RGB, 512, 256, true),
+// The GIST (https://github.com/adamstark/Gist) object for audio analysis.
+// Currently used only for performing the FFT
 gist(fftSize, gistSampleRate = 44100),
+// Initialise the timer for MIDI messages
 startTime(Time::getMillisecondCounterHiRes() * 0.001)
 #endif
 {
-	// Flex glove parameters
+	// Declaration and initialisation for the plugin parameters
+	// These are available for control via the DAW.
+	// Controllable parameters for the left glove (flex sensors)
 	addParameter(thumbParam = new AudioParameterInt(
 		"thumb",
 		"Thumb",
@@ -36,7 +46,7 @@ startTime(Time::getMillisecondCounterHiRes() * 0.001)
 		127,
 		63));
 
-	// Drum glove parameters
+	// Controllable parameters for the right glove (piezos)
 	addParameter(thumbParamDrums = new AudioParameterInt(
 		"thumbDrums",
 		"ThumbDrums",
@@ -67,14 +77,19 @@ startTime(Time::getMillisecondCounterHiRes() * 0.001)
 		0,
 		127,
 		0));
-	
+
+	// The socket the UDP receiver LISTENS to
 	socket.bindToPort(1234);
+	// The socket the UDP receiver WRITES to (not in use TODO check and delete)
 	socket.write("127.0.0.1", 1235, "init", 4);
 }
 
 void JucetestoAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
-	ScopedNoDenormals noDenormals;
+	
+	//ScopedNoDenormals noDenormals;
+	// Get the number of input and output channels
+	// 2 for each in this case
 	const auto totalNumInputChannels = getTotalNumInputChannels();
 	const auto totalNumOutputChannels = getTotalNumOutputChannels();
 
@@ -96,28 +111,32 @@ void JucetestoAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
  	auto* channelLeft = buffer.getWritePointer(0); // left
 	auto* channelRight = buffer.getWritePointer(1); // right
 
+	// Iterate over sample buffer and send samples to FFT FIFO buffer
 	for (int sample = 0; sample < buffer.getNumSamples(); sample++)
 	{
+		// Send mono signal to FFT FIFO buffer
 		pushNextSampleIntoFifo((channelLeft[sample] + channelRight[sample]) / 2);
 	}
 	// Send FFT data if buffer is full
 	if (dataReady)
 	{
+		// SEND
 		calculateAndSendData();
+		// Reset guard
 		dataReady = false;
 	}
 
 	// ---------------- MIDI ----------------
+	// The current time for correct midi timecoding
 	const auto currentTime = Time::getMillisecondCounterHiRes() * 0.001 - startTime;
-	const uint8 newVel = static_cast<uint8>(ringParam->get());
 	// Pinky finger triggers note on
 	if (pinkyParamDrums->get() > 15 && !pinkyOn)
 	{
 		pinkyOn = true;
-		MidiMessage m = MidiMessage::noteOn(channel, pinkyNoteNumber, newVel);
+		MidiMessage m = MidiMessage::noteOn(channel, pinkyNoteNumber, 127.0f);
 		processedMidi.addEvent(m, currentTime);
 	}
-	// Middle finger triggers note off
+	// Middle finger triggers note off (if currently playing)
 	if (middleParamDrums->get() > 15 && pinkyOn)
 	{
 		pinkyOn = false;
@@ -125,16 +144,19 @@ void JucetestoAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffe
 		processedMidi.addEvent(m, currentTime);
 	}
 	
-	// Send
+	// Send MIDI data
 	midiMessages.swapWith(processedMidi);
 }
 
+// Destructor. Responsible for shutting down the UDP socket and clearing the FFT magnitude vector.
 JucetestoAudioProcessor::~JucetestoAudioProcessor()
 {
 	socket.shutdown();
 	gistMagnitudeVector.clear();
 }
 
+// Puts samples into fft FIFO until buffer is full (fftSize)
+// Once the buffer is filled the fft is performed and the resulting data is sent to Unity
 void JucetestoAudioProcessor::pushNextSampleIntoFifo(const float sample)
 {
 	if (gistIndex == fftSize)
@@ -143,24 +165,32 @@ void JucetestoAudioProcessor::pushNextSampleIntoFifo(const float sample)
 		gistIndex = 0;
 		gist.processAudioFrame(gistAudioFrame, fftSize);
 		gistMagnitudeVector = gist.getMagnitudeSpectrum();
-		pitch = gist.pitch();
-		spectralCentroid = gist.spectralCentroid();
-		dataReady = true;
+		pitch = gist.pitch(); // Not currently in use
+		spectralCentroid = gist.spectralCentroid(); // Not currently in use
+		dataReady = true; // Set guard, this triggers the FFT
 	}
 
+	// Put next sample into FIFO
 	gistAudioFrame[gistIndex++] = sample;
 }
 
+// This method extracts audio information and sends it to Unity
+// It gets triggered once the FIFO buffer is full
 void JucetestoAudioProcessor::calculateAndSendData()
 {
-	// Calculate 7 average energy levels for that iteration (7 frequency components => 7 cubes in Unity)
+	// Calculate 7 average energy levels for that iteration
+	// The FFT size is 2048, however to reduce the data sent over UDP the FFT
+	// data is averaged into 7 broad frequency bands.
+
+	// The index for array passed to the UDP data packet
 	int idx = 0;
 
-	// FFT data
+	// Extract FFT data
 	const int step = fftSize / 2 / 7;
 	for (auto y = 0; y < (fftSize / 2 - step); y += step)
 	{
 		float level = 0.0f;
+		// Sum up values for that (broad) frequency band
 		for (int i = y; i < y + step; i++)
 		{
 			level += gistMagnitudeVector[i];
@@ -169,7 +199,7 @@ void JucetestoAudioProcessor::calculateAndSendData()
 		idx++;
 	}
 
-	// Spectral centroid
+	// Spectral centroid (not currently in use)
 	udpData[idx++] = int(spectralCentroid);
 	// Flex glove params
 	udpData[idx++] = indexParam->get();

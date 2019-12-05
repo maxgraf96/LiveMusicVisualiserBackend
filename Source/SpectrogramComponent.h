@@ -2,6 +2,9 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 
+/**
+ * This class is NOT CURRENTLY IN USE
+ */
 class SpectrogramComponent : public Component
 //, Timer
 {
